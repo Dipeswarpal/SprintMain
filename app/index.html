@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rental Equipment Tracking System</title>
+
+    <!-- SAP Fiori launchpad (sandbox): tiles depend on the roles of the logged-in user -->
+    <script>
+        (function () {
+            // small synchronous GET (needed before the launchpad starts)
+            var get = function (url, fallback) {
+                try {
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("GET", url, false);
+                    xhr.setRequestHeader("Accept", "application/json");
+                    xhr.send();
+                    if (xhr.status === 200) return JSON.parse(xhr.responseText);
+                } catch (e) { /* ignore */ }
+                return fallback;
+            };
+
+            // who is logged in (XSUAA login via approuter) + KPI numbers for the tiles
+            var me = get("/api/whoAmI()", { user: "", name: "User", email: "", roles: [] });
+            var kpi = get("/api/kpis()", {});
+            var roles = me.roles || [];
+            var n = function (value) { return value === null || value === undefined ? "" : String(value); };
+            var hasRole = function (allowed) {
+                return allowed.some(function (role) { return roles.indexOf(role) >= 0; });
+            };
+
+            var applications = {};
+            var tiles = [];
+
+            // one app (navigation target) + its launchpad tile (icon + KPI number), only for the
+            // roles that the app's OData service grants access to (srv/*-service.cds @requires)
+            var addApp = function (allowed, intent, component, namespace, title, subtitle, icon, number, info, state) {
+                if (!hasRole(allowed)) return;
+                applications[intent] = {
+                    title: title,
+                    description: subtitle,
+                    additionalInformation: "SAPUI5.Component=" + namespace,
+                    applicationType: "URL",
+                    url: "./" + component + "/webapp",
+                    navigationMode: "embedded"
+                };
+                tiles.push({
+                    id: "rets_tile_" + component,
+                    title: title,
+                    size: "1x1",
+                    tileType: "sap.ushell.ui.tile.DynamicTile",
+                    properties: {
+                        chipId: "rets_chip_" + component,
+                        title: title,
+                        subtitle: subtitle,
+                        info: info,
+                        icon: icon,
+                        numberValue: n(number),
+                        numberState: state || "Neutral",
+                        targetURL: "#" + intent
+                    }
+                });
+            };
+
+            // dispatch & customer master data
+            addApp(["Admin", "Dispatcher", "Manager"], "Customer-manage", "customer-management", "retcl.customermanagement",
+                "Customer Management", "Rental customers & contacts",
+                "sap-icon://customer", kpi.customers, "Customers");
+            addApp(["Admin", "Dispatcher", "YardWorker", "Manager", "Auditor"], "Equipment-overview", "fleet-overview", "retcl.fleetoverview",
+                "Fleet Overview", "Status, grade & depot of every asset",
+                "sap-icon://shipping-status", kpi.availableAssets, "Available assets", "Good");
+            addApp(["Admin", "Dispatcher", "Manager", "Auditor"], "Rental-manage", "rentals", "retcl.rentals",
+                "Rental Contracts", "Contracts, allocations, check-in",
+                "sap-icon://sales-order", kpi.activeRentals, "Active contracts");
+            addApp(["Admin", "Dispatcher", "YardWorker", "Manager", "Auditor"], "Location-manage", "locations", "retcl.locations",
+                "Depots & Yards", "Locations and GPS coordinates",
+                "sap-icon://map-2", kpi.locations, "Locations");
+
+            // inspections & billing
+            addApp(["Admin", "Dispatcher", "YardWorker", "Manager", "Auditor"], "ConditionLog-manage", "inspections", "retcl.inspections",
+                "Inspections", "Check-out / check-in condition logs",
+                "sap-icon://inspection", kpi.damagedAssets, "Damaged / pending inspection",
+                kpi.damagedAssets > 0 ? "Critical" : "Good");
+            addApp(["Admin", "BillingClerk", "Manager", "Auditor", "YardWorker", "Technician"], "RepairBill-approve", "damage-charge-approval", "retcl.damagechargeapproval",
+                "Damage Charge Approval", "Review, approve and post repair bills",
+                "sap-icon://receipt", kpi.pendingBills, "Bills waiting for approval",
+                kpi.pendingBills > 0 ? "Critical" : "Good");
+
+            // workshop & maintenance
+            addApp(["Admin", "Technician", "Manager"], "RepairJob-manage", "repair-jobs", "retcl.repairjobs",
+                "Workshop Repair Jobs", "Technician work orders",
+                "sap-icon://wrench", kpi.openRepairJobs, "Open repair jobs",
+                kpi.openRepairJobs > 0 ? "Critical" : "Good");
+            addApp(["Admin", "Technician", "Manager"], "Maintenance-plan", "maintenance-planner", "retcl.maintenanceplanner",
+                "Maintenance Planner", "Preventive service & calibration",
+                "sap-icon://appointment-2", kpi.plannedMaintenance, "Planned services");
+
+            // used after start-up (see below)
+            window.retsTiles = tiles;
+
+            var names = String(me.name || me.user || "User").split(" ");
+
+            window["sap-ushell-config"] = {
+                defaultRenderer: "fiori2",
+                services: {
+                    // real user in the shell header instead of "Default User"
+                    Container: {
+                        adapter: {
+                            config: {
+                                id: me.user || "USER",
+                                firstName: names[0],
+                                lastName: names.slice(1).join(" "),
+                                fullName: me.name || me.user,
+                                email: me.email
+                            }
+                        }
+                    },
+                    EndUserFeedback: { config: { enabled: false } }
+                },
+                renderers: {
+                    fiori2: {
+                        componentData: {
+                            config: {
+                                enableNotificationsUI: false,
+                                enableNotifications: false,
+                                enableSearch: false,
+                                enablePersonalization: false,
+                                enableSetTheme: true,
+                                enableSetLanguage: true
+                            }
+                        }
+                    }
+                },
+                applications: applications
+            };
+        }());
+    </script>
+
+    <script id="sap-ushell-bootstrap" src="https://sapui5.hana.ondemand.com/1.153.0/test-resources/sap/ushell/bootstrap/sandbox.js"></script>
+
+    <script id="sap-ui-bootstrap"
+        src="https://sapui5.hana.ondemand.com/1.153.0/resources/sap-ui-core.js"
+        data-sap-ui-libs="sap.ui.core, sap.ushell, sap.fe.templates"
+        data-sap-ui-compat-version="edge"
+        data-sap-ui-theme="sap_horizon"
+        data-sap-ui-async="true"
+        data-sap-ui-frame-options="allow"
+        data-sap-ui-preload="async"></script>
+
+    <script>
+        sap.ui.getCore().attachInit(function () {
+
+            // The sandbox puts one tile per application into its "generated group" and adds
+            // demo groups ("Sample Applications"). Keep only the generated group and give it
+            // our tiles with icon + KPI number.
+            var services = window["sap-ushell-config"].services || {};
+            ["FlpLaunchPage", "LaunchPage"].forEach(function (name) {
+                var config = services[name] && services[name].adapter && services[name].adapter.config;
+                if (config && config.groups) {
+                    config.groups = config.groups.filter(function (group) {
+                        return group.id === "sap_ushell_generated_group_id";
+                    });
+                    config.groups.forEach(function (group) {
+                        group.title = "Rental Equipment Tracking";
+                        group.isGroupLocked = true;
+                        group.tiles = window.retsTiles;
+                    });
+                }
+            });
+
+            // "Sign Out" in the user menu logs out of XSUAA via the approuter
+            sap.ushell.Container.registerLogout(function () {
+                window.location.href = "/do/logout";
+                return new Promise(function () {});   // keep waiting: the browser is leaving the page
+            });
+
+            sap.ushell.Container.createRenderer("fiori2", true).then(function (renderer) {
+                renderer.placeAt("content");
+            });
+        });
+    </script>
+</head>
+<body class="sapUiBody sapUiSizeCompact" id="content"></body>
+</html>
