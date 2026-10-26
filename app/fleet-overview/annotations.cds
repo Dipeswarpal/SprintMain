@@ -1,8 +1,6 @@
 using { RentalService } from '../../srv/rental-service/rental-service';
 
-/* ==========================================================================
-   1. RENTAL SERVICE - FLEET EQUIPMENT & ASSET DETAIL (FR-004, FR-010, FR-020)
-   ========================================================================== */
+//     RENTAL SERVICE - FLEET EQUIPMENT & ASSET DETAIL (FR-004, FR-010, FR-020)
 
 annotate RentalService.Equipment with @(
     UI.HeaderInfo: {

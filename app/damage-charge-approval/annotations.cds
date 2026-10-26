@@ -1,8 +1,6 @@
 using { BillingService } from '../../srv/billing-service/billing-service';
 
-/* ==========================================================================
-   2. BILLING SERVICE - DAMAGE CHARGE APPROVAL (FR-007, FR-021, FR-025)
-   ========================================================================== */
+//     BILLING SERVICE - DAMAGE CHARGE APPROVAL (FR-007, FR-021, FR-025)
 
 annotate BillingService.RepairBills with @(
     UI.HeaderInfo: {

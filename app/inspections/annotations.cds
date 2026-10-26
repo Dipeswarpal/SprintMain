@@ -1,8 +1,6 @@
 using { InspectionService } from '../../srv/inspection-service/inspection-service';
 
-/* ==========================================================================
-   9. INSPECTION SERVICE - CONDITION LOGS & INSPECTIONS (FR-005, FR-006)
-   ========================================================================== */
+//  INSPECTION SERVICE - CONDITION LOGS & INSPECTIONS (FR-005, FR-006)
 
 annotate InspectionService.ContractEquipment with @(
     UI.LineItem: [

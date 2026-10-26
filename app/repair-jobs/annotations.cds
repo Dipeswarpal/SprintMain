@@ -1,8 +1,6 @@
 using { MaintenanceService } from '../../srv/maintenance-service/maintenance-service';
 
-/* ==========================================================================
-   4. MAINTENANCE SERVICE - WORKSHOP & REPAIRS (FR-012, FR-013)
-   ========================================================================== */
+//     MAINTENANCE SERVICE - WORKSHOP & REPAIRS (FR-012, FR-013)
 
 annotate MaintenanceService.RepairJobs with @(
     UI.HeaderInfo: {

@@ -1,8 +1,7 @@
 using { RentalService } from '../../srv/rental-service/rental-service';
 
-/* ==========================================================================
-   RENTALS & CONTRACT ALLOCATIONS
-   ========================================================================== */
+//    RENTALS & CONTRACT ALLOCATIONS
+
 
 annotate RentalService.Rentals with @(
     UI.HeaderInfo: {

@@ -1,8 +1,6 @@
 using { RentalService } from '../../srv/rental-service/rental-service';
 
-/* ==========================================================================
-   0. CUSTOMER MANAGEMENT - MASTER DATA (STEP 1: CUSTOMER CREATION)
-   ========================================================================== */
+//  CUSTOMER MANAGEMENT - MASTER DATA (STEP 1: CUSTOMER CREATION)
 
 annotate RentalService.Customers with @(
     UI.HeaderInfo: {

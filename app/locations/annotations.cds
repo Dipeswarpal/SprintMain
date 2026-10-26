@@ -1,9 +1,7 @@
 using { RentalService } from '../../srv/rental-service/rental-service';
 
 
-/* ==========================================================================
-   8. LOCATIONS & YARDS - MASTER DATA (FR-004, FR-020)
-   ========================================================================== */
+    // LOCATIONS & YARDS - MASTER DATA (FR-004, FR-020)
 
 annotate RentalService.Locations with @(
     Capabilities.NavigationRestrictions: {

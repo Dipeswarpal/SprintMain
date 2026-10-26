@@ -1,8 +1,6 @@
 using { MaintenanceService } from '../../srv/maintenance-service/maintenance-service';
 
-/* ==========================================================================
-   MAINTENANCE PLANNER - SCHEDULES & RECORDS
-   ========================================================================== */
+//    MAINTENANCE PLANNER - SCHEDULES & RECORDS
 
 annotate MaintenanceService.MaintenanceRecords with @(
     UI.HeaderInfo: {
