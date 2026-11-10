@@ -26,18 +26,14 @@
         }
     }
 
-    /**
-     * Compute SHA-256 hash using browser Web Crypto API
-     */
+    //Compute SHA-256 hash using browser Web Crypto API
     async function computeBrowserSha256(arrayBuffer) {
         const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    /**
-     * Open Photographic Evidence Capture & Cloudinary Upload Dialog
-     */
+    //  Open Photographic Evidence Capture & Cloudinary Upload Dialog
     function openEvidencePhotoCaptureDialog(options = {}) {
         // Remove existing modal if any
         const existingModal = document.getElementById('sap-cloudinary-capture-modal');
